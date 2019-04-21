@@ -1,19 +1,19 @@
 //================================================
-// YOUR NAME GOES HERE <-----------------  
+// Josiah Ferguson
+// Drawing Assignment
+// March 25, 2019 -- LATE
 //================================================
 #include <iostream>
 #include <fstream>
-using namespace std;
 #include <SFML\Graphics.hpp>
 #include "SettingsMgr.h"
 #include "ShapeMgr.h"
 #include "SettingsUI.h"
 #include "DrawingUI.h"
-using namespace sf;
 
-// Finish this code. Other than where it has comments telling you to 
-// add code, you shouldn't need to add any logic to main to satisfy
-// the requirements of this programming assignment
+using namespace sf;
+using namespace std;
+
 
 int main()
 {
@@ -23,14 +23,27 @@ int main()
 	RenderWindow window(VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Drawing");
 	window.setFramerateLimit(60);
 
-	SettingsMgr settingsMgr(Color::Blue, ShapeEnum::CIRCLE);
-	SettingsUI  settingsUI(&settingsMgr); 
-	ShapeMgr    shapeMgr;
-	DrawingUI   drawingUI(Vector2f(200, 50));
-	
-	// ********* Add code here to make the managers read from shapes file (if the file exists)
 
-	while (window.isOpen()) 
+	// create the classes to control the different aspects of the program
+	SettingsMgr settingsMgr(Color::Blue, ShapeEnum::CIRCLE);
+	SettingsUI  settingsUI(&settingsMgr);                        
+	ShapeMgr    shapeMgr;                                                              
+	DrawingUI   drawingUI(Vector2f(200, 50));
+
+	// ********* Add code here to make the managers read from shapes file (if the file exists)
+	fstream myFile;
+	myFile.open("drawn.bin", ios::in | ios::binary);
+
+	if (myFile)
+	{
+		settingsMgr.loadData(myFile);
+		shapeMgr.inputFile(myFile);
+	}
+
+	myFile.close();
+
+
+	while (window.isOpen())
 	{
 		Event event;
 		while (window.pollEvent(event))
@@ -38,7 +51,12 @@ int main()
 			if (event.type == Event::Closed)
 			{
 				window.close();
-				// ****** Add code here to write all data to shapes file
+				fstream myFile;
+				myFile.open("drawn.bin", ios::out | ios::binary);
+				settingsMgr.saveData(myFile);
+				shapeMgr.outputFile(myFile);
+				myFile.close();
+
 			}
 			else if (event.type == Event::MouseButtonReleased)
 			{
@@ -49,30 +67,20 @@ int main()
 			}
 			else if (event.type == Event::MouseMoved && Mouse::isButtonPressed(Mouse::Button::Left))
 			{
-				
+
 				Vector2f mousePos = window.mapPixelToCoords(Mouse::getPosition(window));
 				// check to see if mouse is in the drawing area
-				if (drawingUI.isMouseInCanvas(mousePos))
+				if (drawingUI.isMouseInSpace(mousePos))
 				{
 					// add a shape to the list based on current settings
 					shapeMgr.addShape(mousePos, settingsMgr.getCurShape(), settingsMgr.getCurColor());
 				}
 			}
 		}
-
-		// The remainder of the body of the loop draws one frame of the animation
 		window.clear();
-
-		// this should draw the left hand side of the window (all of the settings info)
 		settingsUI.draw(window);
-
-		// this should draw the rectangle that encloses the drawing area, then draw the
-		// shapes. This is passed the shapeMgr so that the drawingUI can get the shapes
-		// in order to draw them. This redraws *all* of the shapes every frame.
 		drawingUI.draw(window, &shapeMgr);
-
 		window.display();
-	} // end body of animation loop
-
+	}
 	return 0;
 }

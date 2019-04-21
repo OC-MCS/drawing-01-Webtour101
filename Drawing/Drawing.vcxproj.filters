@@ -37,7 +37,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shapes.bin">
+    <None Include="drawn.bin">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
